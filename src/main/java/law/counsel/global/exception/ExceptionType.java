@@ -5,13 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.FORBIDDEN;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.METHOD_NOT_ALLOWED;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.NO_CONTENT;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import static org.springframework.http.HttpStatus.*;
 
 @Getter
 @AllArgsConstructor
@@ -29,7 +23,11 @@ public enum ExceptionType {
     ACCESS_DENIED(FORBIDDEN, "S002", "접근 권한이 없습니다."),
     JWT_EXPIRED(UNAUTHORIZED, "S003", "인증 정보가 만료되었습니다."),
     JWT_INVALID(UNAUTHORIZED, "S004", "인증 정보가 잘못되었습니다."),
-    JWT_NOT_EXIST(UNAUTHORIZED, "S005", "인증 정보가 존재하지 않습니다.");
+    JWT_NOT_EXIST(UNAUTHORIZED, "S005", "인증 정보가 존재하지 않습니다."),
+
+    // Member
+    MEMBER_ALREADY_EXISTS(CONFLICT,"M001","이미 존재하는 유저입니다."),
+    MEMBER_INFO_INVALID(CONFLICT,"M002","유저 정보가 일치하지 않습니다.");
 
 
     private final HttpStatus status;
