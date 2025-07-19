@@ -34,9 +34,12 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private MemberType memberType;
 
-    @Column(name = "is_active")
-    private Boolean isActive;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    @Builder
+    public Member(Long memberId, String email, String password, MemberType memberType) {
+        this.memberId = memberId;
+        this.email = email;
+        this.password = password;
+        this.memberType = memberType;
+    }
 }
