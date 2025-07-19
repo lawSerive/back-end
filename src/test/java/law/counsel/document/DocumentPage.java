@@ -1,4 +1,0 @@
-package law.counsel.document;
-
-public class DocumentPage {
-}
