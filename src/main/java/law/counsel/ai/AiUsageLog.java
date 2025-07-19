@@ -1,4 +1,4 @@
-package law.counsel.analysis;
+package law.counsel.ai;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,40 +9,44 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import law.counsel.document.Document;
+import law.counsel.member.Member;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "analysis_reports")
+@Table(name = "ai_usage_logs")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AnalysisReport {
+public class AiUsageLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "analysis_report_id")
-    private Long analysisReportId;
+    @Column(name = "ai_log_id")
+    private Long aiLogId;
 
-    @Column(name = "report_title")
-    private String reportTitle;
+    @Column(name = "model_name")
+    private String modelName;
 
-    @Column(name = "total_sentences")
-    private Integer totalSentences;
+    @Column(name = "input_tokens")
+    private Integer inputTokens;
 
-    @Column(name = "high_risk_count")
-    private Integer highRiskCount;
+    @Column(name = "output_tokens")
+    private Integer outputTokens;
 
-    @Column(name = "overall_risk_score")
-    private BigDecimal overallRiskScore;
+    @Column(name = "cost_amount")
+    private BigDecimal costAmount;
 
     @ManyToOne
-    @JoinColumn(name = "document_id", nullable = false)
+    @JoinColumn(name = "document_id")
     private Document document;
+
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
 }
