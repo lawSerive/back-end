@@ -3,6 +3,7 @@ package law.counsel.member.controller;
 import jakarta.validation.Valid;
 import law.counsel.global.response.ResponseBody;
 import law.counsel.global.response.ResponseUtil;
+import law.counsel.member.api.MemberApi;
 import law.counsel.member.dto.SignUpRequest;
 import law.counsel.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/members")
-public class MemberController {
+public class MemberController implements MemberApi {
     private final MemberService memberService;
     /*
     회원 가입

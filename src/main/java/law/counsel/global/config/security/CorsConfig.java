@@ -1,4 +1,4 @@
-package law.counsel.global.config;
+package law.counsel.global.config.security;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;

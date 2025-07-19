@@ -1,4 +1,4 @@
-package law.counsel.global.config;
+package law.counsel.global.config.security;
 
 
 import law.counsel.global.exception.ExceptionHandlerFilter;
