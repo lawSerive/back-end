@@ -1,20 +1,14 @@
 package law.counsel.member;
-
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
-
 @Entity
 @Table(name = "members")
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @Builder
 public class Member {
     @Id
@@ -36,10 +30,11 @@ public class Member {
 
 
     @Builder
-    public Member(Long memberId, String email, String password, MemberType memberType) {
+    public Member(Long memberId, String email, String password, String name, MemberType memberType) {
         this.memberId = memberId;
         this.email = email;
         this.password = password;
+        this.name = name;
         this.memberType = memberType;
     }
 }

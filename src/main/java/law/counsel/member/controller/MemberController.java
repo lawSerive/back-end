@@ -21,8 +21,8 @@ public class MemberController {
     회원 가입
      */
     @PostMapping("/sign-up")
-    public ResponseEntity<ResponseBody<String>> signIn(@RequestBody @Valid SignUpRequest signInRequest){
-        memberService.signUp(signInRequest);
+    public ResponseEntity<ResponseBody<String>> signUp(@RequestBody @Valid SignUpRequest signUpRequest){
+        memberService.signUp(signUpRequest);
         return ResponseEntity.ok(ResponseUtil.createSuccessResponse("회원가입 성공"));
     }
 }
