@@ -41,5 +41,5 @@ public class ContractRequiredClause {
 
     @ManyToOne
     @JoinColumn(name = "type_id", nullable = false)
-    private ContractType contractType;
+    private ContractTypeEntity contractType;
 }

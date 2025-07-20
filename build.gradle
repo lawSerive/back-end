@@ -50,8 +50,8 @@ dependencies {
 	implementation 'commons-io:commons-io:2.11.0'
 	// Image processing
 	implementation 'org.apache.commons:commons-imaging:1.0.0-alpha5'
-	// Swagger
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8'
+	// PDF processing
+	implementation 'org.apache.pdfbox:pdfbox:3.0.1'
 }
 
 tasks.named('test') {

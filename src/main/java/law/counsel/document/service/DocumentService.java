@@ -2,7 +2,11 @@ package law.counsel.document.service;
 
 import law.counsel.document.domain.Document;
 import law.counsel.document.dto.DocumentResponse;
+import law.counsel.document.dto.DocumentUploadResponse;
 import law.counsel.document.repository.DocumentRepository;
+import law.counsel.analysis.dto.RiskAnalysisDto;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -17,6 +21,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,6 +30,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DocumentService {
     private final DocumentRepository documentRepository;
+    private final ObjectMapper objectMapper;
 
     /**
      * 주어진 memberId가 올린 문서 목록을 DTO로 변환해 반환
@@ -82,7 +89,8 @@ public class DocumentService {
                 Document.ProcessingStatus.UPLOADED,
                 Document.ProcessingStatus.OCR_PROCESSING,
                 Document.ProcessingStatus.OCR_COMPLETED,
-                Document.ProcessingStatus.AI_PROCESSING
+                Document.ProcessingStatus.AI_PROCESSING,
+                Document.ProcessingStatus.RISK_ANALYSIS_PROCESSING
         );
 
         return documentRepository.findAll()
@@ -134,6 +142,8 @@ public class DocumentService {
 
                 document.setExtractedText(null);
                 document.setInterpretedText(null);
+                document.setImprovedText(null);
+                document.setRiskAnalysisJson(null);
                 document.setErrorMessage(null);
                 document.setStatus(Document.ProcessingStatus.UPLOADED);
 
@@ -146,6 +156,79 @@ public class DocumentService {
             log.error("Failed to retry document processing: {}", id, e);
             return false;
         }
+    }
+
+    /**
+     * 분석 결과와 함께 문서 정보 조회 (업로드 응답용)
+     */
+    public DocumentUploadResponse getDocumentWithAnalysis(Long documentId) {
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new RuntimeException("Document not found: " + documentId));
+
+        // Wait for processing completion if not completed yet
+        if (document.getStatus() != Document.ProcessingStatus.COMPLETED && 
+            document.getStatus() != Document.ProcessingStatus.FAILED) {
+            
+            waitForProcessingCompletion(documentId);
+            document = documentRepository.findById(documentId)
+                    .orElseThrow(() -> new RuntimeException("Document not found: " + documentId));
+        }
+
+        return convertToUploadResponse(document);
+    }
+
+    private void waitForProcessingCompletion(Long documentId) {
+        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+            int maxAttempts = 60; // 60 seconds max wait
+            int attempts = 0;
+            
+            while (attempts < maxAttempts) {
+                try {
+                    Thread.sleep(1000); // Wait 1 second
+                    Document doc = documentRepository.findById(documentId).orElse(null);
+                    
+                    if (doc != null && (doc.getStatus() == Document.ProcessingStatus.COMPLETED || 
+                                       doc.getStatus() == Document.ProcessingStatus.FAILED)) {
+                        break;
+                    }
+                    
+                    attempts++;
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        });
+
+        try {
+            future.get(65, TimeUnit.SECONDS); // Wait up to 65 seconds
+        } catch (Exception e) {
+            log.warn("Timeout waiting for document processing completion: {}", documentId);
+        }
+    }
+
+    private DocumentUploadResponse convertToUploadResponse(Document document) {
+        DocumentUploadResponse.DocumentUploadResponseBuilder builder = DocumentUploadResponse.builder()
+                .id(document.getId())
+                .fileName(document.getOriginalFilename())
+                .uploadedAt(document.getCreatedAt())
+                .status(document.getStatus().name())
+                .improvedText(document.getImprovedText());
+
+        // Parse risk analysis JSON if available
+        if (document.getRiskAnalysisJson() != null && !document.getRiskAnalysisJson().trim().isEmpty()) {
+            try {
+                List<RiskAnalysisDto> riskAnalyses = objectMapper.readValue(
+                        document.getRiskAnalysisJson(),
+                        new TypeReference<List<RiskAnalysisDto>>() {}
+                );
+                builder.riskAnalyses(riskAnalyses);
+            } catch (Exception e) {
+                log.error("Failed to parse risk analysis JSON for document: {}", document.getId(), e);
+            }
+        }
+
+        return builder.build();
     }
 
     /**

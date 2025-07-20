@@ -61,6 +61,14 @@ public class Document extends AuditEntity {
     @Column(columnDefinition = "LONGTEXT")
     private String interpretedText;
 
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
+    private String improvedText;
+
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
+    private String riskAnalysisJson;
+
     private String errorMessage;
 
 
@@ -69,6 +77,7 @@ public class Document extends AuditEntity {
         OCR_PROCESSING,
         OCR_COMPLETED,
         AI_PROCESSING,
+        RISK_ANALYSIS_PROCESSING,
         COMPLETED,
         FAILED
     }
