@@ -111,7 +111,7 @@ public class FileProcessingService {
     }
 
     @Transactional
-    private void processDocument(Long documentId) throws Exception {
+    public void processDocument(Long documentId) throws Exception {
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new Exception("Document not found: " + documentId));
 
@@ -257,7 +257,7 @@ public class FileProcessingService {
     }
 
     @Transactional
-    private void updateDocumentStatus(Long documentId, Document.ProcessingStatus status, String errorMessage) {
+    public void updateDocumentStatus(Long documentId, Document.ProcessingStatus status, String errorMessage) {
         try {
             Document document = documentRepository.findById(documentId).orElse(null);
             if (document != null) {
