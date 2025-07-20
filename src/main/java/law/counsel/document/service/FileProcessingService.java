@@ -11,11 +11,17 @@ import law.counsel.document.service.ocr.OCRException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.ImageType;
+import org.apache.pdfbox.rendering.PDFRenderer;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -161,16 +167,30 @@ public class FileProcessingService {
     }
 
     private String extractTextFromPDF(File pdfFile) throws Exception {
-        // 간단한 구현: PDF에서 텍스트 추출이 실패하면 OCR로 대체
-        // 실제로는 Apache PDFBox 등을 사용하여 구현해야 합니다
-        try {
-            // TODO: PDF 텍스트 추출 라이브러리 구현
-            // 현재는 OCR로 처리
-            log.warn("PDF text extraction not implemented, falling back to OCR");
-            return ocrService.extractTextFromFile(pdfFile);
-        } catch (Exception e) {
-            log.error("PDF processing failed, trying OCR fallback", e);
-            return ocrService.extractTextFromFile(pdfFile);
+        try (PDDocument document = Loader.loadPDF(pdfFile)) {
+            PDFTextStripper pdfStripper = new PDFTextStripper();
+            String text = pdfStripper.getText(document);
+            if (!text.trim().isEmpty()) {
+                log.info("Successfully extracted text from PDF using PDFTextStripper.");
+                return text;
+            }
+        } catch (IOException e) {
+            log.warn("Failed to extract text directly from PDF, falling back to OCR. Error: {}", e.getMessage());
+        }
+
+        // OCR fallback
+        try (PDDocument document = Loader.loadPDF(pdfFile)) {
+            PDFRenderer pdfRenderer = new PDFRenderer(document);
+            StringBuilder fullText = new StringBuilder();
+            for (int page = 0; page < document.getNumberOfPages(); ++page) {
+                BufferedImage bim = pdfRenderer.renderImageWithDPI(page, 300, ImageType.RGB);
+                String text = ocrService.extractTextFromImage(bim);
+                fullText.append(text);
+            }
+            log.info("Successfully extracted text from PDF using OCR fallback.");
+            return fullText.toString();
+        } catch (IOException | OCRException e) {
+            throw new Exception("Failed to process PDF file with OCR: " + e.getMessage(), e);
         }
     }
 

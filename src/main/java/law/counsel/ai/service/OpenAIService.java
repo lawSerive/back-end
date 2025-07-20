@@ -1,5 +1,6 @@
 package law.counsel.ai.service;
 
+import law.counsel.rule.LegalRule;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -123,11 +124,22 @@ public class OpenAIService {
             String improvedText = improveTextReadability(documentText);
             List<RiskAnalysisDto> riskAnalyses = performRiskAnalysis(improvedText);
             
+            // legalReferences가 비어있을 경우 기본값 설정 및 불필요한 수정 제안 필터링
+            riskAnalyses.forEach(analysis -> {
+                if (analysis.getLegalReferences() == null || analysis.getLegalReferences().isEmpty()) {
+                    analysis.setLegalReferences(List.of("관련 법령 없음"));
+                }
+            });
+
+            List<RiskAnalysisDto> filteredRiskAnalyses = riskAnalyses.stream()
+                .filter(analysis -> !"수정 불필요".equals(analysis.getSuggestedRevision()))
+                .toList();
+
             DocumentAnalysisResponse response = new DocumentAnalysisResponse();
             response.setImprovedText(improvedText);
-            response.setRiskAnalyses(riskAnalyses);
+            response.setRiskAnalyses(filteredRiskAnalyses);
             
-            log.info("Document risk analysis completed with {} risk items", riskAnalyses.size());
+            log.info("Document risk analysis completed with {} risk items", filteredRiskAnalyses.size());
             return response;
         } catch (Exception e) {
             log.error("Document risk analysis failed", e);
@@ -140,7 +152,13 @@ public class OpenAIService {
         String response = callChatGPTAPI(prompt);
         
         try {
-            return objectMapper.readValue(response, new TypeReference<List<RiskAnalysisDto>>() {});
+            List<RiskAnalysisDto> riskAnalyses = objectMapper.readValue(response, new TypeReference<List<RiskAnalysisDto>>() {});
+            riskAnalyses.forEach(analysis -> {
+                if (analysis.getLegalReferences() == null || analysis.getLegalReferences().isEmpty()) {
+                    analysis.setLegalReferences(LegalRule.findLegalReferences(analysis.getOriginalText()));
+                }
+            });
+            return riskAnalyses;
         } catch (Exception e) {
             log.error("Failed to parse risk analysis response: {}", response, e);
             
