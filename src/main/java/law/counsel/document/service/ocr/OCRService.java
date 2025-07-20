@@ -42,17 +42,8 @@ public class OCRService {
             tempTesseract.setPageSegMode(1);
             tempTesseract.setOcrEngineMode(1);
             
-            // 간단한 테스트로 Tesseract 작동 확인
-            File testFile = new File("test_image_that_does_not_exist.png");
-            try {
-                tempTesseract.doOCR(testFile);
-            } catch (Exception e) {
-                // 파일이 없어서 발생하는 에러는 정상 - Tesseract는 작동함
-                if (e.getMessage() != null && !e.getMessage().contains("not exist")) {
-                    log.warn("Tesseract test failed, OCR may not work properly: {}", e.getMessage());
-                    available = false;
-                }
-            }
+            // Tesseract 기본 설정 확인 (실제 테스트는 하지 않음)
+            log.info("Tesseract configuration completed");
             
             log.info("OCR Service initialized with language: {}, Available: {}", language, available);
             
@@ -75,8 +66,8 @@ public class OCRService {
      */
     public String extractTextFromFile(File imageFile) throws OCRException {
         if (!tesseractAvailable || tesseract == null) {
-            log.warn("Tesseract not available, returning mock text for file: {}", imageFile.getName());
-            return generateMockText(imageFile.getName());
+            log.error("Tesseract not available for file: {}", imageFile.getName());
+            throw new OCRException("OCR 엔진이 사용 불가능합니다. Tesseract 설정을 확인해주세요.");
         }
         
         try {
@@ -120,8 +111,8 @@ public class OCRService {
      */
     public String extractTextFromImage(BufferedImage image) throws OCRException {
         if (!tesseractAvailable || tesseract == null) {
-            log.warn("Tesseract not available, returning mock text for BufferedImage");
-            return generateMockText("BufferedImage");
+            log.error("Tesseract not available for BufferedImage");
+            throw new OCRException("OCR 엔진이 사용 불가능합니다. Tesseract 설정을 확인해주세요.");
         }
         
         try {
@@ -172,36 +163,6 @@ public class OCRService {
      */
 
     
-    /**
-     * 테스트용 모의 텍스트 생성
-     */
-    private String generateMockText(String fileName) {
-        return """
-                임대차 계약서
-                
-                제1조 (목적) 본 계약은 임대인과 임차인 간의 부동산 임대차에 관한 사항을 정함을 목적으로 한다.
-                
-                제2조 (임대차 기간) 임대차 기간은 2024년 1월 1일부터 2026년 12월 31일까지로 한다.
-                
-                제3조 (보증금 및 차임) 보증금은 금 2,000만원정이며, 월 차임은 금 50만원정으로 한다.
-                
-                제4조 (특약사항) 
-                - 계약 해지 시 3개월 전 통지할 것
-                - 임차인은 임대인의 동의 없이 전대 또는 전차할 수 없다
-                - 보증금 반환은 계약 종료 후 30일 이내에 하기로 한다
-                
-                제5조 (손해배상) 임차인이 고의 또는 과실로 임대목적물을 손상시킨 때에는 원상회복 의무를 진다.
-                
-                본 계약 체결을 증명하기 위하여 계약서 2부를 작성하여 당사자가 서명날인 후 각각 1부씩 보관한다.
-                
-                2024년 1월 1일
-                
-                임대인: 홍길동 (서명)
-                임차인: 김철수 (서명)
-                
-                [OCR 처리 불가 
-                """;
-    }
     
     /**
      * 서비스 종료 시 리소스 정리

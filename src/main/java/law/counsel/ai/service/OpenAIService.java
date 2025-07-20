@@ -142,9 +142,35 @@ public class OpenAIService {
         try {
             return objectMapper.readValue(response, new TypeReference<List<RiskAnalysisDto>>() {});
         } catch (Exception e) {
-            log.error("Failed to parse risk analysis response: {}", response);
-            throw new Exception("Failed to parse risk analysis response: " + e.getMessage());
+            log.error("Failed to parse risk analysis response: {}", response, e);
+            
+            // JSON 파싱 실패 시 기본 분석 결과 반환
+            log.warn("Returning fallback risk analysis due to parsing error");
+            return createFallbackRiskAnalysis(documentText);
         }
+    }
+    
+    private List<RiskAnalysisDto> createFallbackRiskAnalysis(String documentText) {
+        // 문서를 문장별로 나누어 기본 분석 생성
+        String[] sentences = documentText.split("[.!?]");
+        List<RiskAnalysisDto> fallbackAnalysis = new java.util.ArrayList<>();
+        
+        for (int i = 0; i < sentences.length && i < 10; i++) {
+            String sentence = sentences[i].trim();
+            if (!sentence.isEmpty()) {
+                RiskAnalysisDto analysis = new RiskAnalysisDto();
+                analysis.setSentenceId((long) (i + 1));
+                analysis.setRiskLevel("LOW");
+                analysis.setOriginalText(sentence);
+                analysis.setRiskReason("AI 분석 중 오류가 발생하여 기본 분석을 제공합니다.");
+                analysis.setLegalReferences(new java.util.ArrayList<>());
+                analysis.setSimpleExplanation("분석을 완료하지 못했습니다. 수동 검토가 필요합니다.");
+                analysis.setSuggestedRevision("전문가 검토 권장");
+                fallbackAnalysis.add(analysis);
+            }
+        }
+        
+        return fallbackAnalysis;
     }
 
     private String createReadabilityImprovementPrompt(String ocrText) {
@@ -175,9 +201,15 @@ public class OpenAIService {
                 
                 요구사항:
                 1. 각 문장을 분석하여 위험도를 HIGH, MEDIUM, LOW로 분류
-                2. 위험한 조항에 대해서는 사유와 법령 근거 제시
-                3. 일반인이 이해하기 쉬운 설명과 권장 문장 제공
+                2. 위험한 조항에 대해서는 반드시 사유와 법령 근거 제시
+                3. 일반인이 이해하기 쉬운 설명과 권장 수정 문장 제공
                 4. 결과를 JSON 배열 형태로 반환
+                5. 모든 필드는 반드시 값을 가져야 하며, 빈 문자열("")도 허용되지 않음
+                
+                필드별 규칙:
+                - riskReason: 위험도가 MEDIUM 이상일 때는 반드시 구체적인 사유 작성, LOW일 때는 "위험도가 낮습니다" 작성
+                - legalReferences: 관련 법령이 있으면 배열로 작성, 없으면 빈 배열 []
+                - suggestedRevision: MEDIUM 이상일 때는 권장 수정안 작성, LOW일 때는 "수정 불필요" 작성
                 
                 JSON 형식:
                 [
@@ -185,10 +217,10 @@ public class OpenAIService {
                     "sentenceId": 숫자,
                     "riskLevel": "HIGH|MEDIUM|LOW",
                     "originalText": "원본 문장",
-                    "riskReason": "위험 사유",
+                    "riskReason": "위험 사유 (필수, null 불가)",
                     "legalReferences": ["관련 법령1", "관련 법령2"],
                     "simpleExplanation": "쉬운 설명",
-                    "suggestedRevision": "권장 수정 문장"
+                    "suggestedRevision": "권장 수정 문장 (필수, null 불가)"
                   }
                 ]
                 
