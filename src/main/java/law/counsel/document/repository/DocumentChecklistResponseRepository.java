@@ -8,7 +8,4 @@ import java.util.Optional;
 
 public interface DocumentChecklistResponseRepository extends JpaRepository<DocumentChecklistResponse, Long> {
     List<DocumentChecklistResponse> findByDocument_Id(Long docId);
-
-    Optional<DocumentChecklistResponse>
-    findByDocument_IdAndItem_ItemId(Long docId, Long itemId);
 }
