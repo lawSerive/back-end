@@ -1,36 +1,3 @@
-package controller;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import dto.ApiResponse;
-import dto.DocumentResponseDto;
-import entity.Document;
-import service.DocumentService;
-import service.FileProcessingService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
-
-@RestController
-@RequestMapping("/api/v1/documents")
-@RequiredArgsConstructor
-@Slf4j
-@Tag(name = "Document", description = "문서 OCR 및 AI 해석 API")
-public class DocumentController {
-
-    private final FileProcessingService fileProcessingService;
-    private final DocumentService documentService;
 
     /**
      * 파일 업로드 및 처리 시작

@@ -1,9 +1,8 @@
-package service;
+package law.counsel.document.service;
 
-
-import Repository.DocumentRepository;
-import dto.DocumentResponseDto;
-import entity.Document;
+import law.counsel.document.domain.Document;
+import law.counsel.document.dto.DocumentResponse;
+import law.counsel.document.repository.DocumentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -24,44 +23,53 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class DocumentService {
-
     private final DocumentRepository documentRepository;
+
+    /**
+     * 주어진 memberId가 올린 문서 목록을 DTO로 변환해 반환
+     */
+    public List<DocumentResponse> listDocuments(Long memberId) {
+        List<Document> docs = documentRepository.findByMember_MemberId(memberId);
+        return docs.stream()
+                .map(d -> DocumentResponse.builder()
+                                .id(d.getId())
+                                .fileName(d.getOriginalFilename())
+                                .uploadedAt(d.getCreatedAt())
+                        .build()
+                )
+                .collect(Collectors.toList());
+    }
 
     /**
      * 문서 ID로 조회
      */
     @Transactional(readOnly = true)
-    public Optional<DocumentResponseDto> getDocumentById(Long id) {
-        return documentRepository.findById(id)
-                .map(this::convertToDto);
+    public Optional<Document> getDocumentById(Long id) {
+        return documentRepository.findById(id);
     }
 
     /**
      * 모든 문서 조회 (페이징)
      */
     @Transactional(readOnly = true)
-    public Page<DocumentResponseDto> getAllDocuments(int page, int size) {
+    public Page<Document> getAllDocuments(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        return documentRepository.findAll(pageable)
-                .map(this::convertToDto);
+        return documentRepository.findAll(pageable);
     }
 
     /**
      * 상태별 문서 조회
      */
     @Transactional(readOnly = true)
-    public List<DocumentResponseDto> getDocumentsByStatus(Document.ProcessingStatus status) {
-        return documentRepository.findByStatusOrderByCreatedAtDesc(status)
-                .stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+    public List<Document> getDocumentsByStatus(Document.ProcessingStatus status) {
+        return documentRepository.findByStatusOrderByCreatedAtDesc(status);
     }
 
     /**
      * 완료된 문서 조회
      */
     @Transactional(readOnly = true)
-    public List<DocumentResponseDto> getCompletedDocuments() {
+    public List<Document> getCompletedDocuments() {
         return getDocumentsByStatus(Document.ProcessingStatus.COMPLETED);
     }
 
@@ -69,7 +77,7 @@ public class DocumentService {
      * 처리 중인 문서 조회
      */
     @Transactional(readOnly = true)
-    public List<DocumentResponseDto> getProcessingDocuments() {
+    public List<Document> getProcessingDocuments() {
         List<Document.ProcessingStatus> processingStatuses = List.of(
                 Document.ProcessingStatus.UPLOADED,
                 Document.ProcessingStatus.OCR_PROCESSING,
@@ -80,7 +88,6 @@ public class DocumentService {
         return documentRepository.findAll()
                 .stream()
                 .filter(doc -> processingStatuses.contains(doc.getStatus()))
-                .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
@@ -88,7 +95,7 @@ public class DocumentService {
      * 실패한 문서 조회
      */
     @Transactional(readOnly = true)
-    public List<DocumentResponseDto> getFailedDocuments() {
+    public List<Document> getFailedDocuments() {
         return getDocumentsByStatus(Document.ProcessingStatus.FAILED);
     }
 
@@ -102,10 +109,7 @@ public class DocumentService {
             if (documentOpt.isPresent()) {
                 Document document = documentOpt.get();
 
-                // 파일 시스템에서 파일 삭제
                 deleteFileFromSystem(document.getFilePath());
-
-                // 데이터베이스에서 삭제
                 documentRepository.delete(document);
 
                 log.info("Document deleted successfully: {}", id);
@@ -128,7 +132,6 @@ public class DocumentService {
             if (documentOpt.isPresent()) {
                 Document document = documentOpt.get();
 
-                // 이전 결과 초기화
                 document.setExtractedText(null);
                 document.setInterpretedText(null);
                 document.setErrorMessage(null);
@@ -159,22 +162,4 @@ public class DocumentService {
             log.error("Failed to delete file from system: {}", filePath, e);
         }
     }
-
-    /**
-     * Entity를 DTO로 변환
-     */
-    private DocumentResponseDto convertToDto(Document document) {
-        return DocumentResponseDto.builder()
-                .id(document.getId())
-                .fileName(document.getFileName())
-                .originalFileName(document.getOriginalFileName())
-                .fileSize(document.getFileSize())
-                .mimeType(document.getMimeType())
-                .status(document.getStatus())
-                .extractedText(document.getExtractedText())
-                .interpretedText(document.getInterpretedText())
-                .errorMessage(document.getErrorMessage())
-                .createdAt(document.getCreatedAt())
-                .updatedAt(document.getUpdatedAt())
-                .build();
-    }
+}

@@ -1,33 +1,44 @@
-package entity;
-
+package law.counsel.document.domain;
 
 import jakarta.persistence.*;
+import law.counsel.global.response.AuditEntity;
+import law.counsel.member.Member;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import lombok.Setter;
 
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "documents")
-@Data
-@Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Document {
+@Builder
 
+/*
+문서 정보
+ */
+public class Document extends AuditEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "document_id")
     private Long id;
 
-    @Column(nullable = false)
-    private String fileName;
+    @Column(name = "original_filename")
+    private String originalFilename; // 업로드된 원본 파일명
 
-    @Column(nullable = false)
-    private String originalFileName;
+    @Column(name = "file_name")
+    private String fileName; // 저장된 파일명
+
+    @ManyToOne
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
+
+    @Enumerated(EnumType.STRING)
+    private ContractType contractType; // 계약 유형
 
     @Column(nullable = false)
     private String filePath;
@@ -52,11 +63,6 @@ public class Document {
 
     private String errorMessage;
 
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
 
     public enum ProcessingStatus {
         UPLOADED,

@@ -8,6 +8,6 @@ import lombok.*;
 public class SimpleExplanationDto {
     private Long sentenceId;
     private String simpleExplanation;
-    private String riskLevel;
+    private Integer riskLevel;
     private String suggestedRevision;
 }

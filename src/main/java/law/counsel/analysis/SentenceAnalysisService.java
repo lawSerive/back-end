@@ -13,18 +13,19 @@ public class SentenceAnalysisService {
     private final SentenceAnalysisRepository analysisRepository;
 
     public List<SentenceAnalysis> getAnalysesByDocumentId(Long documentId) {
-        return analysisRepository.findByDocumentSentence_DocumentId(documentId);
+        return analysisRepository.findBySentence_Id(documentId);
     }
 
     public List<SimpleExplanationDto> getExplanationsByDocumentId(Long documentId) {
-        List<SentenceAnalysis> analyses = analysisRepository.findByDocumentSentence_DocumentId(documentId);
+        List<SentenceAnalysis> analyses = analysisRepository.findBySentence_Id(documentId);
         return analyses.stream()
                 .map(a -> new SimpleExplanationDto(
-                        a.getDocumentSentence().getSentenceId(),
+                        a.getSentence().getSentenceId(),
                         a.getSimpleExplanation(),
                         a.getRiskLevel(),
                         a.getSuggestedRevision()
                 ))
                 .toList();
+    }
 }
 
