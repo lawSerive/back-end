@@ -20,12 +20,13 @@ public class DocumentService {
     public List<DocumentListResponse> listDocuments(Long memberId) {
         List<Document> docs = documentRepository.findByMember_MemberId(memberId);
         return docs.stream()
-                .map(d -> new DocumentListResponse(
-                        d.getId(),
-                        d.getOriginalFilename(),
-                        d.getCreatedAt(),
-                        d.getFilePath()      // presigned URL 혹은 저장된 URL
-                ))
+                .map(d -> DocumentListResponse.builder()
+                                .id(d.getId())
+                                .fileName(d.getFilePath())
+                                .uploadedAt(d.getCreatedAt())
+                                .downloadUrl(d.getFilePath())
+                        .build()
+                )
                 .collect(Collectors.toList());
     }
 }
