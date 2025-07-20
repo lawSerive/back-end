@@ -6,12 +6,15 @@ package law.counsel.document.api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import law.counsel.document.domain.ContractType;
 import law.counsel.document.dto.ChecklistBatchSaveDto;
 import law.counsel.document.dto.ChecklistItemDto;
+import law.counsel.document.dto.DocumentResponse;
 import law.counsel.global.config.swagger.SwaggerApiFailedResponse;
 import law.counsel.global.config.swagger.SwaggerApiResponses;
 import law.counsel.global.config.swagger.SwaggerApiSuccessResponse;
@@ -41,10 +44,11 @@ public interface ChecklistApi {
                       ➜ 해당 템플릿 문항을 반환합니다.
                       """
     )
+    @ApiResponse(content = @Content(schema = @Schema(implementation = ChecklistItemDto.class)))
     @SwaggerApiResponses(
             success = @SwaggerApiSuccessResponse(
                     description = "조회 성공",
-                    response    = ChecklistItemDto.class
+                    response    = ChecklistItemDto[].class
             ),
             errors = {
                     @SwaggerApiFailedResponse(

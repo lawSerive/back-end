@@ -9,6 +9,7 @@ import law.counsel.global.response.ResponseBody;
 import law.counsel.global.response.ResponseUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +26,7 @@ public class ChecklistController implements ChecklistApi {
 
     /*  체크리스트 + 사용자의 체크 상태 조회 */
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ResponseBody<List<ChecklistItemDto>>> getChecklist(@PathVariable Long documentId, @RequestParam ContractType contractType) {
         List<ChecklistItemDto> result = checklistService.loadForDocument(documentId, contractType);
         return ResponseEntity.ok(ResponseUtil.createSuccessResponse(result));
@@ -32,6 +34,7 @@ public class ChecklistController implements ChecklistApi {
 
     /*  체크 / 언체크 저장 */
     @PostMapping("/bulk")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ResponseBody<Void>> saveBulk(@PathVariable Long documentId, @RequestBody ChecklistBatchSaveDto dto) {
         checklistService.saveResponses(documentId, dto);
         return ResponseEntity.ok(ResponseUtil.createSuccessResponse());

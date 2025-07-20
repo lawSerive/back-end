@@ -3,7 +3,6 @@ package law.counsel.document.service;
 import law.counsel.document.domain.Document;
 import law.counsel.document.dto.DocumentResponse;
 import law.counsel.document.repository.DocumentRepository;
-import law.counsel.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

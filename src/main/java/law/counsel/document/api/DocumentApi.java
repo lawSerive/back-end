@@ -5,6 +5,9 @@ package law.counsel.document.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import law.counsel.document.dto.DocumentResponse;
 import law.counsel.global.config.swagger.SwaggerApiFailedResponse;
@@ -35,10 +38,11 @@ public interface DocumentApi {
             로그인된 사용자가 업로드한 모든 문서를 반환합니다.
             """
     )
+    @ApiResponse(content = @Content(schema = @Schema(implementation = DocumentResponse.class)))
     @SwaggerApiResponses(
             success = @SwaggerApiSuccessResponse(
                     description = "조회 성공",
-                    response    = DocumentResponse.class
+                    response    = DocumentResponse[].class
             ),
             errors = {
                     @SwaggerApiFailedResponse(value = ExceptionType.NEED_AUTHORIZED, description = "인증 정보 없음"),
