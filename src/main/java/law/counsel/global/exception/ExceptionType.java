@@ -28,6 +28,10 @@ public enum ExceptionType {
     // Member
     MEMBER_ALREADY_EXISTS(CONFLICT,"M001","이미 존재하는 유저입니다."),
     MEMBER_INFO_INVALID(CONFLICT,"M002","유저 정보가 일치하지 않습니다."),
+
+    //Document
+    DOCUMENT_NOT_FOUND(NOT_FOUND,"CH001","문서를 찾을 수 없습니다."),
+
     // checklist
     TEMPLATE_NOT_FOUND(NOT_FOUND,"CH001","템플릿을 찾을 수 없습니다.");
 

@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DocumentService {
     private final DocumentRepository documentRepository;
-    private final MemberRepository memberRepository;
+
 
     /**
      * 주어진 memberId가 올린 문서 목록을 DTO로 변환해 반환

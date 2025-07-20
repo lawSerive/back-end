@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -62,7 +63,7 @@ public class ChecklistService {
                 respRepo.findByDocument_Id(docId).stream()
                         .collect(Collectors.toMap(
                                 r -> r.getItem().getItemId(), r -> r));
-
+        List<DocumentChecklistResponse> toSave = new ArrayList<>();
         for (ChecklistBatchSaveDto.Item i : dto.items()) {
 
             // 문항 프록시
@@ -78,7 +79,8 @@ public class ChecklistService {
 
             resp.setIsChecked(i.isChecked());
             resp.setCheckedAt(LocalDateTime.now());
-            respRepo.save(resp);
+            toSave.add(resp);
         }
+        respRepo.saveAll(toSave);
     }
 }
