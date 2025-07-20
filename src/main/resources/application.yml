@@ -1,0 +1,49 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/law?autoReconnect=true&useUnicode=true&serverTimezone=Asia/Seoul
+    username: root
+    password: 1234
+  jpa:
+    database: mysql
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+    hibernate:
+      ddl-auto: update
+    show_sql: true
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+    output.ansi.enabled: always
+jwt:
+  domain: localhost:8080
+  path: /api/v1/members
+  secure: true
+  cryptographic-key:
+    public-key: null
+    private-key: null
+    salt: "a12624197585f4f4425d188825ea97647e56f02822cd9ae89582776e15f189f0fe176f119d1b51916e25197f68752f42f2b1fbf0b9148894aed77434c9abfc5c"
+  issuer: "LawCounsel"
+  audience: "LawCounsel"
+  accessTokenExpiredIn: 1800
+  refreshTokenExpiredIn: 1209600
+
+counsel:
+  swagger:
+    server-url: http://localhost:8080
+    description: 법률 자문 시스템 API 서버
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
+
+verification:
+  code:
+    expiry-minutes: 10
