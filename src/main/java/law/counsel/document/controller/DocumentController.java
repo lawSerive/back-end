@@ -1,6 +1,7 @@
 package law.counsel.document.controller;
 
-import law.counsel.document.dto.DocumentListResponse;
+import law.counsel.document.api.DocumentApi;
+import law.counsel.document.dto.DocumentResponse;
 import law.counsel.document.service.DocumentService;
 import law.counsel.global.jwt.annotation.CurrentMemberId;
 import law.counsel.global.response.ResponseBody;
@@ -17,13 +18,16 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/documents")
 @RequiredArgsConstructor
-public class DocumentController {
+public class DocumentController implements DocumentApi {
+
     private final DocumentService documentService;
 
-
+    /*
+    문서 전체조회
+     */
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ResponseBody<List<DocumentListResponse>>> listMyDocuments(@CurrentMemberId Long memberId) {
+    public ResponseEntity<ResponseBody<List<DocumentResponse>>> listMyDocuments(@CurrentMemberId Long memberId) {
         return ResponseEntity.ok(ResponseUtil.createSuccessResponse(documentService.listDocuments(memberId)));
     }
 }
