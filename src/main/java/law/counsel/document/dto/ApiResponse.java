@@ -1,4 +1,4 @@
-package dto;
+package law.counsel.document.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;

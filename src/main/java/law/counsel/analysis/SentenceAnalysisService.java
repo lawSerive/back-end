@@ -13,11 +13,11 @@ public class SentenceAnalysisService {
     private final SentenceAnalysisRepository analysisRepository;
 
     public List<SentenceAnalysis> getAnalysesByDocumentId(Long documentId) {
-        return analysisRepository.findByDocumentSentence_Id(documentId);
+        return analysisRepository.findBySentence_Id(documentId);
     }
 
     public List<SimpleExplanationDto> getExplanationsByDocumentId(Long documentId) {
-        List<SentenceAnalysis> analyses = analysisRepository.findByDocumentSentence_Id(documentId);
+        List<SentenceAnalysis> analyses = analysisRepository.findBySentence_Id(documentId);
         return analyses.stream()
                 .map(a -> new SimpleExplanationDto(
                         a.getSentence().getSentenceId(),
@@ -26,5 +26,6 @@ public class SentenceAnalysisService {
                         a.getSuggestedRevision()
                 ))
                 .toList();
+    }
 }
 

@@ -36,4 +36,5 @@ public class ChecklistController implements ChecklistApi {
         checklistService.saveResponses(documentId, dto);
         return ResponseEntity.ok(ResponseUtil.createSuccessResponse());
     }
+
 }
