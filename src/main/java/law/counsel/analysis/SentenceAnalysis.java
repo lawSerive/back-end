@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import law.counsel.document.DocumentSentence;
+import law.counsel.document.domain.DocumentSentence;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

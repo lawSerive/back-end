@@ -12,6 +12,8 @@ import law.counsel.global.jwt.annotation.CurrentMemberId;
 import law.counsel.global.response.ResponseBody;
 import law.counsel.global.response.ResponseUtil;
 import lombok.RequiredArgsConstructor;
+import io.swagger.v3.oas.annotations.Parameter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,6 +28,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/documents")
 @RequiredArgsConstructor
+@Slf4j
 public class DocumentController implements DocumentApi {
 
     private final DocumentService documentService;
@@ -37,23 +40,13 @@ public class DocumentController implements DocumentApi {
         return ResponseEntity.ok(ResponseUtil.createSuccessResponse(documentService.listDocuments(memberId)));
     }
 
-    @PostMapping("/upload")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ResponseBody<Document>> uploadDocument(@RequestParam("file") MultipartFile file) {
-        Document document = fileProcessingService.uploadAndProcessFile(file);
-        return ResponseEntity.ok(ResponseUtil.createSuccessResponse(document));
-    }
-
     @PostMapping("/{id}/retry")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ResponseBody<Boolean>> retryProcessing(@PathVariable Long id) {
         boolean success = documentService.retryProcessing(id);
-        if (success) {
-            return ResponseEntity.ok(ResponseUtil.createSuccessResponse(true));
-        } else {
-            return ResponseEntity.badRequest().body(ResponseUtil.createErrorResponse("Failed to retry processing"));
-        }
+        return ResponseEntity.ok(ResponseUtil.createSuccessResponse(true));
     }
+
     /**
      * 파일 업로드 및 처리 시작
      */
@@ -64,16 +57,18 @@ public class DocumentController implements DocumentApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 파일"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 오류")
     })
-    public ResponseEntity<ApiResponse<DocumentResponseDto>> uploadFile(
-            @Parameter(description = "업로드할 이미지 파일", required = true)
-            @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<ApiResponse<DocumentResponse>> uploadFile(@Parameter(description = "업로드할 이미지 파일", required = true)
+            @RequestParam("file") MultipartFile file, @CurrentMemberId Long memberId) {
 
         try {
             log.info("File upload request received: {}", file.getOriginalFilename());
 
-            Document document = fileProcessingService.uploadAndProcessFile(file);
-            DocumentResponseDto responseDto = documentService.getDocumentById(document.getId())
-                    .orElseThrow(() -> new RuntimeException("Document not found after upload"));
+            Document document = fileProcessingService.uploadAndProcessFile(file, memberId);
+            DocumentResponse responseDto = DocumentResponse.builder()
+                    .id(document.getId())
+                    .fileName(document.getOriginalFilename())
+                    .uploadedAt(document.getCreatedAt())
+                    .build();
 
             return ResponseEntity.ok(ApiResponse.success("파일이 성공적으로 업로드되었습니다. 처리가 시작됩니다.", responseDto));
 
