@@ -1,4 +1,4 @@
-package law.counsel.document;
+package law.counsel.document.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

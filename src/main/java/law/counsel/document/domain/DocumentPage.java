@@ -1,4 +1,4 @@
-package law.counsel.analysis;
+package law.counsel.document.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,39 +8,33 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import law.counsel.document.Document;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
-
 @Entity
-@Table(name = "analysis_reports")
+@Table(name = "document_pages")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AnalysisReport {
+public class DocumentPage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "analysis_report_id")
-    private Long analysisReportId;
+    @Column(name = "page_id")
+    private Long pageId;
 
-    @Column(name = "report_title")
-    private String reportTitle;
+    @Column(name = "page_number")
+    private Integer pageNumber;  // 페이지 번호
 
-    @Column(name = "total_sentences")
-    private Integer totalSentences;
+    @Column(name = "extracted_text", columnDefinition = "TEXT")
+    private String extractedText;  // 페이지 전체 텍스트
 
-    @Column(name = "high_risk_count")
-    private Integer highRiskCount;
-
-    @Column(name = "overall_risk_score")
-    private BigDecimal overallRiskScore;
+    @Column(name = "ocr_confidence", columnDefinition = "JSON")
+    private String ocrConfidence;  // OCR 신뢰도 정보
 
     @ManyToOne
     @JoinColumn(name = "document_id", nullable = false)
