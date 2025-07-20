@@ -1,4 +1,4 @@
-package law.counsel.document;
+package law.counsel.document.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,13 +24,13 @@ public class DocumentSentence {
     private Long sentenceId;
 
     @Column(name = "sentence_order")
-    private Integer sentenceOrder;
+    private Integer sentenceOrder;  // 문장의 해당 페이지 내 순서
 
     @Column(name = "original_content", columnDefinition = "TEXT")
-    private String originalContent;
+    private String originalContent;  // 원본 문장 텍스트
 
     @Column(name = "position_coordinates", columnDefinition = "JSON")
-    private String positionCoordinates;
+    private String positionCoordinates; // 사각형 좌표 json {x,y,w,h}
 
     @ManyToOne
     @JoinColumn(name = "document_id", nullable = false)
